@@ -18,42 +18,68 @@ def get_bsObj(url):
     except HTTPError as e:
         return None
 
+
+# 取得特定網址的動物資料
+def animals_per_page(url):
+    bs_obj = get_bsObj(website)
+    # 取得可飼養狗的表格
+    dog_table = bs_obj.findAll("table", {"width": "180", "cellpadding": "0"})
+
+    dog_chip_code_regex = "(Show_Animal)"
+
+    animals = []
+
+    dog_count = 0
+    for dog_detail in dog_table:
+        # 取得所有狗的詳細網址
+        dog_a = dog_detail.find("a", {"href": re.compile(dog_chip_code_regex)})
+        dog_chip_id = ""
+
+        # 沒ID就繼續找
+        if dog_a is None:
+            continue
+
+        dog_chip_id = dog_a["href"]
+
+        # 取得飼養人名稱
+        keeper_regex = "images/logo_heart_26.gif"
+        keepers = dog_detail.findAll("font", {"color": "#009900"})
+        dog_keepers = []
+        for keep in keepers:
+            dog_keepers.append(keep.get_text(strip = True))
+
+        animal = Animal(dog_chip_id, dog_keepers)
+        animals.append(animal)
+
+    return(animals)
+
+
+# 取得動物資料的最後一頁的頁碼
+def last_page(url):
+    page_regex = "(an_chipcode=&an_color=&an_name=&an_zone=&user_name=&GetPass=-1&intCurPage)"
+    bsObj = get_bsObj(url)
+    href = bsObj.find("a", {"href": re.compile(page_regex)})
+    td = href.parent.get_text(strip = True)
+    # 會拿到文字, 想直接濾出數字來
+    numbers = [int(s) for s in td.split() if s.isdigit()]
+    # 會取得最後一頁的頁碼以及總資料筆數
+    return numbers[0]
+
 website = "http://www.apatw.org/All_animal.asp"
-# website = "http://www.apatw.org/All_animal.asp?an_chipcode=&an_color=&an_name=&an_zone=&user_name=&GetPass=-1&intCurPage=40"
+animals_website = "http://www.apatw.org/All_animal.asp?an_chipcode=&an_color=&an_name=&an_zone=&user_name=&GetPass=-1&intCurPage="
 
-bs_obj = get_bsObj(website)
-# 取得可飼養狗的表格
-dog_table = bs_obj.findAll("table", {"width": "180", "cellpadding": "0"})
-
-dog_chip_code_regex = "(Show_Animal)"
+last_page = last_page(website)
+print(last_page)
 
 animals = []
-
-dog_count = 0
-for dog_detail in dog_table:
-    # 取得所有狗的詳細網址
-    dog_a = dog_detail.find("a", {"href": re.compile(dog_chip_code_regex)})
-    dog_chip_id = ""
-
-    # 沒ID就繼續找
-    if dog_a is None:
-        continue
-
-    dog_chip_id = dog_a["href"]
-    print("==============")
-
-    # 取得飼養人名稱
-    keeper_regex = "images/logo_heart_26.gif"
-    keepers = dog_detail.findAll("font", {"color": "#009900"})
-    dog_keepers = []
-    for keep in keepers:
-        dog_keepers.append(keep.get_text(strip = True))
-
-    animal = Animal(dog_chip_id, dog_keepers)
-    animals.append(animal)
-
-
+# range範圍為 start <= index < end, 所以要+1, 不然會少最後一頁
+for website_index in range(1,last_page + 1):
+    new_website = animals_website + str(website_index)
+    animals.extend(animals_per_page(new_website))
 print(len(animals))
+
+# # animals.extend(animals_per_page(website))
+# print(len(animals))
 for animal in animals:
     print(animal.keeps)
     print(animal.chip_id)

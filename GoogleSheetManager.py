@@ -10,10 +10,10 @@ from oauth2client.file import Storage
 
 SCOPES = "https://www.googleapis.com/auth/spreadsheets"
 CLIENT_SECRET_FILE = "client_secret.json"
-APPLICATION_NAME = "GoogleSheet"
-SPREAD_SHEET_ID = "1PF0sUjwA2JOlsIu-fvnK2lAopGTN9a6weiNuLtAMhIU"
-SHEET_NAME = "SheetAPA!"
-HOME_DIR = "/Users/Nigel/Desktop/Nigel/VSCode/APA"
+APPLICATION_NAME = " "
+SPREAD_SHEET_ID = " "
+SHEET_NAME = " "
+HOME_DIR = " "
 
 try:
     import argparse

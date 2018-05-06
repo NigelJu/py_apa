@@ -10,6 +10,7 @@ GoogleApaSheet.py:
 名稱應為main.py, 負責呼叫「去拉資料」以及「把資料存至GoogleSheet」
 
 提供API：
+
 ApaManager.py:
 實作拉資料的功能（利用Beautiful Soup）
 

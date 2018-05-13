@@ -20,7 +20,8 @@ for (index, animal) in enumerate(animals):
     # keepers, images要拉出變一條字串
     images = get_str_by_list(animal.images)
     keepers = get_str_by_list(animal.keeps)
-    datas = [animal.chip_id, keepers, images]
+    # datas = [animal.chip_id, keepers, images]
+    datas = [keepers, images]
     datas.extend(animal.details)
     google_sheet_manager.write_data_with_range(datas, range_name = range_name)
 

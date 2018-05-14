@@ -33,53 +33,40 @@ def get_areas():
         areas_url.append(area["href"])
     return areas_url
 
+def get_golafus():
+    areas = get_areas()
+    driver = webdriver.Safari()
+    golafus = []
+    for index, area in enumerate(areas):
+        # if index > 3:
+        #     break
+        detail = get_bsObj(area)
+        title = detail.find("span", {"id": "sites-page-title"}).get_text()
+        print(title)
+        visit_records = detail.find_all("li", {"style": "list-style-position:outside;list-style-type:circle"})
+        urls = []
+        visitors = []
+        for visit_record in visit_records:
+            url = visit_record.find("a")["href"]
+            visitor = visit_record.get_text()
+            urls.append(url)
+            visitors.append(visitor)
 
-#####
-
-areas = get_areas()
-
-driver = webdriver.Safari()
-golafus = []
-for index, area in enumerate(areas):
-    print("第" + str(index) + "筆")
-    print("網址是" + area)
-
-    detail = get_bsObj(area)
-    title = detail.find("span", {"id": "sites-page-title"}).get_text()
-    visit_records = detail.find_all("li", {"style": "list-style-position:outside;list-style-type:circle"})
-    urls = []
-    visitors = []
-    for visit_record in visit_records:
-        url = visit_record.find("a")["href"]
-        visitor = visit_record.get_text()
-        urls.append(url)
-        visitors.append(visitor)
-
-    #使用selenium點選iframe, 並取得新分頁網址#
-    driver.get(area)
-    iframe = driver.find_element_by_tag_name("iframe")
-    time.sleep(5)
-    iframe.click()
-    time.sleep(5)
-    handles = driver.window_handles
-
-    if len(handles) == 1:
-        print("現在處理的分頁")
-        print(driver.title)
-        print(handles)
-        print("無法取得網址")
-        continue
-
-    driver.switch_to.window(handles[1])
-    time.sleep(5)
-    album_url = driver.current_url
+        #使用selenium點選iframe, 並取得新分頁網址#
+        driver.get(area)
+        iframe = driver.find_element_by_tag_name("iframe")
+        driver.switch_to_frame(iframe)
+        urls_in_iframe = driver.find_elements_by_xpath("//@href")
+        album_url = ""
+        if len(urls_in_iframe) > 0:
+            album_url = urls_in_iframe[0].text
+        print(album_url)
+       
+        golafu = Golafu(title=title, album_url=album_url, visits_url=urls, visitors=visitors)
+        golafus.append(golafu)
 
     driver.close()
-
-    golafu = Golafu(title=title, album_url=album_url, visits_url=urls, visitors=visitors)
-    golafus.append(golafu)
-
-print("結束了")
+    return golafus
     
-for golafu in golafus:
-    print(golafu.album_url)
+
+# get_golafus()
